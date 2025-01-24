@@ -24,17 +24,17 @@ void figure1(double angle=21){
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
 
-  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"hms\",\"pass326\",.2,.95,0.48,1.1,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"hms\",\"pass400\",.2,.95,0.54,1.13,.85,1.15,\"xb\",1)");
 
   //  l->DeleteEntry();
 
   TLegend* l= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_hms");
   //  l1->Delete();
   l->SetNColumns(2);
-  l->SetX1(.24);
+  l->SetX1(.15);
   l->SetX2(.81);
-  l->SetY1(.63);
-  l->SetY2(.818);
+  l->SetY1(.67);
+  l->SetY2(.88);
   l->Draw();
 
   TPaveText *t1=new TPaveText(.2,.823,.8,.905,"NDC");
@@ -45,10 +45,10 @@ void figure1(double angle=21){
 
   t1->SetBorderSize(0);
   t1->SetFillColor(kWhite);
-  t1->Draw();
+  //  t1->Draw();
 
   TGraphErrors *gs=(TGraphErrors*)gPad->GetListOfPrimitives()->FindObject("grcx1");
-  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"shms\",\"pass326\",.2,.95,0.48,1.1,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"shms\",\"pass400\",.2,.95,0.48,1.1,.85,1.15,\"xb\",1)");
   //  TLegend* l0= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_shms");
   //  l0->Delete();
 

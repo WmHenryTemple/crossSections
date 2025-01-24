@@ -71,7 +71,7 @@ void plot_cx(string target="d", string angle="39", string spec="shms", string pa
  TGraph *gm_k2=getKP("akp17",angle);  
  TGraphErrors *gm_jam=getJAM(thetac);  
 
- if(xaxis=="xb") gm->GetXaxis()->SetTitle("Bjorken x");
+ if(xaxis=="xb") gm->GetXaxis()->SetTitle("x");
  if(xaxis=="ep") gm->GetXaxis()->SetTitle("E' (GeV)");
  if(xaxis=="w2") gm->GetXaxis()->SetTitle("W2 (GeV^2)");
  gm->GetXaxis()->SetLimits(xbmin,xbmax);
@@ -122,6 +122,8 @@ if(target=="r"){
 
 
  gm->GetYaxis()->SetTitleSize(.055);
+  gm->GetXaxis()->SetTitleSize(.065);
+  gm->GetXaxis()->SetTitleOffset(.7);
  gm->GetXaxis()->CenterTitle();
  gm->GetYaxis()->CenterTitle();
  // gm->GetXaxis()->SetNdivisions(-507 );
@@ -165,13 +167,14 @@ if(target=="r"){
   }
   double mrthn_y[7]={1.725, 1.697, 1.674, 1.656, 1.629, 1.588, 1.544};
   double mrthn_ye[7]={.015, .014, .014, .016, .016, .016, .023};
-  for(int i=0;i<7;i++)mrthn_y[i]=mrthn_y[i]/2;
-  for(int i=0;i<7;i++)mrthn_ye[i]=mrthn_ye[i]/2;
+  double mrthn_corr[7]={1.00, .998, .998, 1.00, 1.003, 1.006};
+  for(int i=0;i<7;i++)mrthn_y[i]=mrthn_y[i]/2*mrthn_corr[i];
+  for(int i=0;i<7;i++)mrthn_ye[i]=mrthn_ye[i]/2*mrthn_corr[i];
   TGraphErrors *mrthn=new TGraphErrors(7,mrthn_x,mrthn_y,0,mrthn_ye);
   mrthn->SetMarkerStyle(21);
   mrthn->SetMarkerSize(0.5);
   mrthn->SetMarkerColor(kGreen+2);
-  if(target=="r"&& angle=="21")mrthn->Draw("sp");
+  //  if(target=="r"&& angle=="21")mrthn->Draw("sp");
   //  if(spec=="hms")gwhit->Draw("sp");
   /////////////////////////////////////////////////////////////////////
 
@@ -416,7 +419,7 @@ if(target=="r"){
    }
  else leg=new TLegend(.17,.55,.58,.92);
  leg->SetBorderSize(1);
- leg->AddEntry(gm,"F1F221","l");
+ // leg->AddEntry(gm,"F1F221","l");
  if(xaxis=="xb")
    {
      //     leg->AddEntry(gm_k,"KP DIS","l");
@@ -428,14 +431,17 @@ if(target=="r"){
    g->SetMarkerStyle(33);
    g->SetMarkerSize(1.0);
    g->SetMarkerColor(kBlack);
-   leg->AddEntry(grcx1,"HMS Hall C, E12-10-002","p");
    leg->AddEntry(gm_k1,"KP HYBRID","l");
    leg->AddEntry(g,"SHMS Hall C, E12-10-002","p");
    leg->AddEntry(gm_k2,"AKP17","l");
-   leg->AddEntry(mrthn,"Hall A, MARATHON","p");
+   leg->AddEntry(grcx1,"HMS Hall C, E12-10-002","p");
+   //   leg->AddEntry(mrthn,"Hall A, MARATHON","p");
    leg->AddEntry(gm_cj,"CJ15","l");
    //   leg->AddEntry(gwhit,"SLAC, (Whitlow)","p");
+   leg->AddEntry(gm,"F1F221","l");
    leg->AddEntry(gm_jam,"JAM","l");
+
+
 
 
  }

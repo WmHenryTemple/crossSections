@@ -67,7 +67,7 @@ void plot_cx(string target="d", string angle="39", string spec="shms", string pa
  TGraph *gm_k1=getKP("hybrid",angle);  
  TGraph *gm_k2=getKP("akp17",angle);  
  TGraph *gm_jam=getJAM(thetac);  
- if(xaxis=="xb") gm->GetXaxis()->SetTitle("Bjorken x");
+ if(xaxis=="xb") gm->GetXaxis()->SetTitle("x");
  if(xaxis=="ep") gm->GetXaxis()->SetTitle("E' (GeV)");
  if(xaxis=="w2") gm->GetXaxis()->SetTitle("W2 (GeV^2)");
  gm->GetXaxis()->SetLimits(xbmin,xbmax);
@@ -116,12 +116,21 @@ if(target=="r"){
 // gm->GetXaxis()->SetTitle("");
 
 
- gm->GetYaxis()->SetTitleSize(.055);
+// gm->GetYaxis()->SetTitleSize(.055);
+// gm->GetYaxis()->SetTitleSize(.07);
  gm->GetXaxis()->CenterTitle();
  gm->GetYaxis()->CenterTitle();
+
+ //Figure2
+ gm->GetXaxis()->SetTitleSize(.07);
+ gm->GetXaxis()->SetTitleOffset(.8);
+ gm->GetYaxis()->SetTitleSize(.07);
+ gm->GetYaxis()->SetTitleOffset(.8);
+
  // gm->GetXaxis()->SetNdivisions(-507 );
  // gm->GetYaxis()->SetNdivisions(-507 );
  // gm->GetXaxis()->SetLabelSize(0.06);// size of axis value font
+
  // TCanvas *c1=new TCanvas();
  TPad *pad1, *pad2;
  if(numPad==2){
@@ -349,7 +358,9 @@ if(target=="r"){
      if(xaxis=="xb") gr1->GetXaxis()->SetTitle("Bjorken X");
      if(xaxis=="ep") gr1->GetXaxis()->SetTitle("E' (GeV)");
      if(xaxis=="w2") gr1->GetXaxis()->SetTitle("W2 (GeV^2)");
-     gr1->GetXaxis()->SetTitleSize(.06);
+     //     gr1->GetXaxis()->SetTitleSize(.06);
+     gr1->GetXaxis()->SetTitleSize(.08);
+     if(angle=="21")gr1->GetXaxis()->SetTitleSize(.07);
      gr1->GetXaxis()->CenterTitle();
      gr1->SetTitle("Data/F1F221 v0.995");
      gr1->GetYaxis()->SetRangeUser(ratiomin,ratiomax);
@@ -408,9 +419,11 @@ if(target=="r"){
  TLegend *leg;
  if(xaxis!="w2")
    {
-     leg=new TLegend(.35,.6,.65,.9);
+     //     leg=new TLegend(.35,.6,.65,.9);
+     leg=new TLegend(.15,.67,.81,.88);
    }
  else leg=new TLegend(.15,.5,.55,.9);
+
  leg->SetBorderSize(1);
  leg->AddEntry(gm,"F1F221","l");
  if(xaxis=="xb")

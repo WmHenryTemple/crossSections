@@ -24,7 +24,7 @@ void figure4(double angle=21){
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
 
-  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"hms\",\"pass151\",.2,.95,0.67,1.2,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"hms\",\"pass326\",.2,.95,0.67,1.2,.85,1.15,\"xb\",1)");
 
   //  l->DeleteEntry();
 
@@ -47,11 +47,11 @@ void figure4(double angle=21){
   t1->Draw();
 
   TGraphErrors *gs=(TGraphErrors*)gPad->GetListOfPrimitives()->FindObject("grcx1");
-  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"shms\",\"pass151\",.2,.95,0.48,1.18,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"21\",\"shms\",\"pass326\",.2,.95,0.48,1.18,.85,1.15,\"xb\",1)");
   TLegend* l0= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_shms");
   l0->Delete();
 
 
-  c1->SaveAs("figure4_151.pdf");
+  c1->SaveAs("figure4_326.pdf");
   //  return;
 }

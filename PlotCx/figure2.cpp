@@ -13,7 +13,7 @@ void figure2(double angle=21){
   //  gStyle->SetTitleW(.7);
   gStyle->SetOptTitle(0);
   //  gStyle->SetBorderSize(1);
-  TCanvas *c1=new TCanvas("c1","Figure 2",700,700);
+  TCanvas *c1=new TCanvas("c1","Figure 2",800,500);
   c1->SetGrayscale(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetCanvasColor(0);
@@ -32,10 +32,10 @@ void figure2(double angle=21){
   gPad->SetRightMargin(small);
   gPad->SetTopMargin(.1);
   gPad->SetLeftMargin(.15);
-  gROOT->ProcessLine("plot_cx(\"r\",\"25\",\"shms\",\"pass324\",.25,.95,0.551,1.12,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"25\",\"shms\",\"pass400\",.25,.95,0.57,1.14,.85,1.15,\"xb\",1)");
   TLegend* l= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_shms");
   l->Delete();
-  TPaveText *t1=new TPaveText(.22,.83,.93,.89,"NDC");
+  TPaveText *t1=new TPaveText(.22,.8,.93,.89,"NDC");
   //  t1->AddText("#theta_{c} = 25.0#circ");
   //  t1->AddText("4.41 < Q^{2} (GeV^{2}) < 9.91");
   t1->AddText("4.41 < Q^{2} (GeV^{2}) < 9.91; #theta_{c} = 25.0#circ");
@@ -49,7 +49,7 @@ void figure2(double angle=21){
   gPad->SetBottomMargin(small);
   gPad->SetRightMargin(.15);
   gPad->SetLeftMargin(small);
-  gROOT->ProcessLine("plot_cx(\"r\",\"29\",\"shms\",\"pass324\",.25,.95,0.551,1.12,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"29\",\"shms\",\"pass400\",.25,.95,0.57,1.14,.85,1.15,\"xb\",1)");
   TLegend* l2= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_shms");
   l2->Delete();
   TPaveText *t2=new TPaveText(.05,.8,.8,.89,"NDC");
@@ -64,7 +64,7 @@ void figure2(double angle=21){
   gPad->SetTopMargin(small);
   gPad->SetRightMargin(small);
   gPad->SetLeftMargin(0.15);
-  gROOT->ProcessLine("plot_cx(\"r\",\"33\",\"shms\",\"pass324\",.25,.95,0.551,1.12,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"33\",\"shms\",\"pass400\",.25,.95,0.57,1.14,.85,1.15,\"xb\",1)");
   TLegend* l3= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_shms");
   l3->Delete();
   TPaveText *t3=new TPaveText(.2,.9,.95 ,0.99,"NDC");
@@ -78,7 +78,7 @@ void figure2(double angle=21){
   gPad->SetTopMargin(small);
   gPad->SetRightMargin(.15);
   gPad->SetLeftMargin(small);
-  gROOT->ProcessLine("plot_cx(\"r\",\"39\",\"shms\",\"pass324\",.25,.95,0.551,1.12,.85,1.15,\"xb\",1)");
+  gROOT->ProcessLine("plot_cx(\"r\",\"39\",\"shms\",\"pass400\",.25,.95,0.57,1.14,.85,1.15,\"xb\",1)");
   TLegend* l4= (TLegend*)gPad->GetListOfPrimitives()->FindObject("leg_shms");
   //  l4->SetNColumns(2);
   l4->SetX1(.15);

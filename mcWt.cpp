@@ -35,6 +35,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   string kin=tgt+angle+"deg"+mom;
   string kin_al="h"+angle+"deg"+mom;
   cout <<" The Kinematic is " << kin<<endl;
+
   Double_t pOffset=0.;
   Double_t mp = .9382723;
   Double_t mp2 = mp*mp;
@@ -47,7 +48,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   Double_t charge=0;
   ofstream oFile;
   ofstream outFile;
-  outFile.open(Form("pass71_mcWt_%s.txt",spec.c_str()),ios::app | ios::out );
+  outFile.open(Form("pass401_mcWt_%s.txt",spec.c_str()),ios::app | ios::out );
 
 
   if(spec=="shms")
@@ -88,7 +89,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
       ypCut= 0.05;
       yCut= 10.;
     }
-
+  //kin err
   ebeam=10.602;//*(1.0-0.001);
   //  charge=getCharge(tgt,angle,mom);
   //  Want counts/uA
@@ -101,6 +102,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
     offset = -0.000276*pow(hsec,3) + 0.002585*pow(hsec,2) - 0.008697*hsec+1.0064;
     hsec=hsec*offset;
   }
+  //kin err
   //  hsec=hsec*(1.-0.001);
   cout << "The central momentum is "<<hsec<<endl;
   if(angle=="39")thetac=38.975;
@@ -163,6 +165,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   ////****  Beam is not along z ******
   cout << "Correcting central angle for beam angle"<<endl;
   cout << "Before: "<<thetac<<endl;
+  //kin err
   //  beamTheta=0.00045+0.00025; //shooting beam right .45mr
   beamTheta=0.00045; //shooting beam right .45mr
   if(spec=="hms")beamTheta*=-1;
@@ -176,7 +179,12 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   Float_t zrec, ytarrec, delrec, yptarrec, xptarrec, xtarini, xstop, ystop, fail_id;
   TString fmc = "mc/casey/"+spec+"_mc_"+kin+".root";
   //  fmc="/u/group/shms/wmhenry/mc-single-arm/worksim/"+spec+"_mc_"+kin+".root";
-  if(tgt=="alu"||tgt=="ald")fmc="mc/aruni/"+spec+"_mc_"+kin+".root";
+  //  if(tgt=="alu"||tgt=="ald")fmc="mc/aruni/"+spec+"_mc_"+kin+".root";
+  if(tgt=="alu"||tgt=="ald")fmc="mc/deb/"+spec+"_mc_"+kin+".root";
+
+  if(tgt=="alu")fmc="mc/deb/"+spec+"_"+angle+"deg_m"+mom+"_al_upstream.root";
+  if(tgt=="ald")fmc="mc/deb/"+spec+"_"+angle+"deg_m"+mom+"_al_downstream.root";
+
   //  if(tgt=="alu")fmc="/w/hallc-scifs17exp/xem2/aruni/mc-reweight/output/mc-ntuples/mc145.root";
   //  if(tgt=="ald")fmc="/w/hallc-scifs17exp/xem2/aruni/mc-reweight/output/mc-ntuples/mc146.root";
 
@@ -228,7 +236,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   trm->SetBranchAddress("ysieve", &ystop);
   trm->SetBranchAddress("stop_id", &fail_id);
 
-  TString fOut=Form("mcWtOut/pass71/%s_mcWt%s.root",spec.c_str(),kin.c_str());
+  TString fOut=Form("mcWtOut/pass401/%s_mcWt%s.root",spec.c_str(),kin.c_str());
   TFile *out=new TFile(fOut,"RECREATE");
   TTree *tree=new TTree("tree","Monte Carlo Weighted");
   cout << "opened two more files"<<endl;
@@ -253,7 +261,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   tree->Branch("fail_id",&fail_id);
 
   Float_t born_corr, rad, rci, hstheta, sigmac, q2, w2, csb_cx;
-  Float_t hse, hsev, thetaini, sin2, nu, wt, xb, dt, phasespcor, phasespcorCos; 
+  Float_t hse, hsev, thetaini, sin2, nu, wt, wt_noCsb, xb, dt, phasespcor, phasespcorCos; 
   Int_t ngen=0;
   Int_t nacc=0;
   Float_t born=0;
@@ -279,6 +287,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
 
   //histos for comparisons
   TH1F *delWt=new TH1F("delWt","Monte Carlo Weighted delta",60,-30.,30.);
+  TH1F *delWt_noCsb=new TH1F("delWt_noCsb","Monte Carlo Weighted delta no CSB",60,-30.,30.);  
   TH1F *hAvgTheta=new TH1F("hAvgTheta","Average Theta",60,-30.,30.);
   //  TH1F *delWt=new TH1F("delWt","Monte Carlo Weighted delta",15,-6.,9.);
   TH1F *xpWt=new TH1F("xpWt","Monte Carlo Weighted xp_tar",100,-100.,100.);
@@ -286,6 +295,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   TH1F *yWt=new TH1F("yWt","Monte Carlo Weighted y_tar",334,-10,10);
   TH1F *w2Wt=new TH1F("w2Wt","Monte Carlo Weighted W2",375,-10,20);
   TH1F *w2Wt2=new TH1F("w2Wt2","Monte Carlo Weighted W2",720,-10,26);
+  TH1F *w2Wt2_noCsb=new TH1F("w2Wt2_noCSB","Monte Carlo Weighted W2 no CSB",720,-10,26);  
   TH1F *xbWt=new TH1F("xbWt","Monte Carlo Weighted X_{B}",120,0,3.);
   //
   TH1F *centralBorn=new TH1F("avgBorn","#sigma_{born}(#delta,#theta_{central) ",32,-10.,22.);
@@ -312,7 +322,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
   TProfile* hp=new TProfile("hp","Profile of xB Born",100,0,1); 
   TProfile* deltaBornProf=new TProfile("deltaBornProf","Profile of delta Born",32,-10,22); 
   Int_t nEvents=trm->GetEntries();
-  //  nEvents=10000;
+  //  nEvents=5000;
   Int_t wtf=0;
   cout << "About to loop"<<endl;
 
@@ -367,11 +377,20 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
 
       //Add CSB
       csb_cx=0;
-      if(spec=="shms")
+      if(spec=="shms"|| (spec=="hms"&&angle=="59") )
 	{
 	  Double_t p0=-2.09 * thetaini*180./TMath::Pi() +12.47;
 	  Double_t p1=0.2 * thetaini*180./TMath::Pi() -0.6338;
 	  csb_cx=exp(p0)*(exp(p1*(ebeam-hsev))-1.);
+
+	  //***************************************************************
+	  // Testing how much a difference using **************************
+	  // separate csb_cx for lh2 and ld2 makes*************************
+	  // From Gyang's studies *****************************************
+	  //	  if(tgt=="d")csb_cx=exp(-41.69)*(exp(4.46*(10.602-hsev))-1.);//ld2
+	  //	  if(tgt=="h")csb_cx=exp(-48.32)*(exp(5.18*(10.602-hsev))-1.);//ld2
+	  //***************************************************************
+
 	  if(tgt=="d")csb_cx=2*csb_cx;
 	  if(tgt=="c")csb_cx=12*csb_cx*19.32/((890.4+769.1)/2); //need to add. (use rad length)
 	  //	  if(tgt=="alu"||tgt=="ald")csb_cx=27*csb_cx*19.32/((890.4+769.1)/2); //need to add. (use rad length)
@@ -401,6 +420,7 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
 	{
 	  //	  cout << "wt1" << wt <<endl;
 	  wt = (born/rci+csb_cx)*phasespcor;
+	  wt_noCsb=(born/rci)*phasespcor;
 	  //	  cout << "wt  " << wt <<endl;
 	  sigave+=born;
 	  ngen++;
@@ -424,15 +444,17 @@ void mcWt(string tgt="h",string angle="21", string mom="3p3", string spec="shms"
 	       //		 wt=100;
 	     }
 	      //	      cout << "wt  " << wt <<"\t"<< born <<"\t"<< rci <<"\t"<< csb_cx <<"\t"<< phasespcor << endl;
-
-	      deltaBornProf->Fill(delrec,born);
-	   delWt->Fill(delrec,wt);
+	      
+	   deltaBornProf->Fill(delrec,born);
+	   delWt->Fill(delrec,wt);//delta weighted histogram
+	   delWt_noCsb->Fill(delrec,wt_noCsb);//delta weighted histogram	   
 	   hAvgTheta->Fill(delrec,hstheta*wt*180/TMath::Pi());
 	   xpWt->Fill(xptarrec*1000.,wt);//mr
 	   ypWt->Fill(yptarrec*1000.,wt);//mr
 	   yWt->Fill(ytarrec,wt);
-	   w2Wt->Fill(w2,wt);
+	   w2Wt->Fill(w2,wt);//W2 weighted histogram
 	   w2Wt2->Fill(w2,wt);
+	   w2Wt2->Fill(w2,wt_noCsb);	   
 	   xbWt->Fill(xb,wt);
 	   //focal plane variables
 	   mc_xVy->Fill(yfoc,xfoc,wt);

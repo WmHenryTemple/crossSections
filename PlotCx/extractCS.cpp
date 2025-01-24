@@ -50,15 +50,13 @@ TGraphErrors* extractCS(string spec="shms", string target="r", string angle="21"
   //   ofile.open("q2rangeMthn.txt",ios::app | ios::out );
   ///////////////////////?/////////////////////////////////////////////////
 
-  TH1F *hkinErr;
-  /*
-    =getKinErrorFromMc(target, angle, mom, spec,cs);
-    //  cout << "Get the kin error hostogram"<<endl;
-    if(rebin && cs<5){
+  TH1F *hkinErr=getKinErrorFromMc(target, angle, mom, spec,cs);
+  //  cout << "Get the kin error hostogram"<<endl;
+  if(rebin && cs<5){
     hkinErr->Rebin(3);
     hkinErr->Scale(1/3.);
-    }
-  */
+  }
+
   double ang=21;
   double spec_flag=0.;
   if(spec=="shms")spec_flag=1.;
@@ -150,8 +148,8 @@ TGraphErrors* extractCS(string spec="shms", string target="r", string angle="21"
       hrdd->Rebin(w2rebin);
       cout << "In the MC here are "<<hmdd->GetNbinsX()<<endl;
       cout << "In the data here are "<<hrdd->GetNbinsX()<<endl;
-      //      hkinErr->Rebin(w2rebin);
-      //      hkinErr->Scale(1./w2rebin);
+      hkinErr->Rebin(w2rebin);
+      hkinErr->Scale(1./w2rebin);
     }
       hrdd->Divide(hmdd);    // W2
   }
@@ -249,7 +247,7 @@ TGraphErrors* extractCS(string spec="shms", string target="r", string angle="21"
       // No idea what I was doing here.  Why not a delta check on HMS?
       if( (deltad>-10&&deltad<22&&spec=="shms") || spec=="hms") //This is how I handle rebinned data
 	{
-	  cout << "after delta cut, bin:" << i <<endl;      
+	  cout << "after delta cut, bin:" << i <<endl;
 
 	  //Debs delta correction for SHMS  as of data pass 62 its in datayield.cpp 
 	  //	  if(spec=="shms")
@@ -270,11 +268,13 @@ TGraphErrors* extractCS(string spec="shms", string target="r", string angle="21"
 	  if(cs==1 || cs== 6){   
 	    if(target=="r"){
 	      errh=sqrt(errh*errh+qh_err*qh_err);
+	      errd=sqrt(errd*errd+qd_err*qd_err+0.0015*0.0015);
 	    }
 	    else{
 	      errh=sqrt(errh*errh+qh_err*qh_err+0.0030*0.0030);
+	      errd=sqrt(errd*errd+qd_err*qd_err+0.0030*0.0030);	      
 	    }
-	    errd=sqrt(errd*errd+qd_err*qd_err+0.0015*0.0015);
+	    
 	  }
 
 	  Double_t nu= ebeam-ep;
@@ -332,8 +332,12 @@ TGraphErrors* extractCS(string spec="shms", string target="r", string angle="21"
 		    boil_err=sqrt(pow(hboil_d->GetBinContent(getBin),2)+pow(hboil_h->GetBinContent(getBin),2) );
 		  }		  
 		  if(angle!="59")modErr=abs(gmodDep->Eval(w2)/100.);
+
+		  
 		  int bin=i;
-		  //		    if(cs>=5)bin=hkinErr->FindBin(w2);
+		  //if(cs>=5)bin=hkinErr->FindBin(w2);
+		  //else hkinErr->FindBin(deltah);
+
 		  val=getGlobalError(grd, grh, ep, w2, thetac, hsec, deltah, spec, angle, target, mom, xb, g_rad, hkinErr, bin, lte, charge_err, boil_err, modErr);  
 		  if(target=="h")cxe.push_back(val*cxh);
 		  if(target=="d")cxe.push_back(val*cxd);
@@ -359,11 +363,11 @@ TGraphErrors* extractCS(string spec="shms", string target="r", string angle="21"
 		  if(xaxis=="xb")eprime.push_back(xb);
 		  if(xaxis=="w2")eprime.push_back(w2);
 		  if(xaxis=="ep")eprime.push_back(ep);
-		  cout << ".............................xb, d/h: "<<xb<<"\t"<<cxd/cxh/2<<endl;
+		  //		  cout << ".............................xb, d/h: "<<xb<<"\t"<<cxd/cxh/2<<endl;
 		}
 	      if(cs==0 || (cs==5&& goodW))//data/model
 		{
-		  cout << "good 3:  "<<goodW <<endl;	  
+		  //		  cout << "good 3:  "<<goodW <<endl;	  
 		  if(first)wmin=w2;first=false;
 		  wmax=w2;
 

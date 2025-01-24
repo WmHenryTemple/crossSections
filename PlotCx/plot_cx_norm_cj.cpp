@@ -30,17 +30,18 @@ void normalizeIt(TGraphErrors *g, TGraph* gcj){
 
 }
 
-void normalizeItband(TGraphErrors *g, TGraph* gcj){
+void normalizeItband(TGraphAsymmErrors *g, TGraph* gcj){
   double x,y;
   int npts= g->GetN();
   for(int i=0; i<npts; i++)
     {
-
+      cout << 
       g->GetPoint(i,x,y);
       double y_cj=gcj->Eval(x);
       double error= g->GetErrorY(i)/y_cj;
-      g->SetPoint(i,x,0.7);
-      g->SetPointError(i,0,error);
+      cout <<"x,y,cj,error: "<<x<<"\t"<<y<<"\t"<<y_cj<<"\t"<<error<<endl;
+      g->SetPoint(i,x,0.92);
+      g->SetPointError(i,0,0,0,error);
 
     }
 
@@ -60,7 +61,7 @@ void normalizeIt(TGraph *g, TGraph* gcj){
       cout << "n1 After x,y: "<<x<<","<<y<<endl;
     }
 }
-void plot_cx(string target="r", string angle="21", string spec="shms", string pass="pass151", float xbmin=0.0, float xbmax=1.0, float cxmin=0.0, float cxmax = 50.0, float ratiomin = 0.7, float ratiomax =1.3, string xaxis = "xb", int numPad=1 ){
+void plot_cx(string target="r", string angle="21", string spec="shms", string pass="pass326", float xbmin=0.0, float xbmax=1.0, float cxmin=0.0, float cxmax = 50.0, float ratiomin = 0.7, float ratiomax =1.3, string xaxis = "xb", int numPad=1 ){
 
  Float_t delta, ratio, err, ep, model_k, modeld, modelh, xmin, xmax;
  string pset[5];
@@ -213,15 +214,17 @@ if(target=="r"){
   }
   double mrthn_y[7]={1.725, 1.697, 1.674, 1.656, 1.629, 1.588, 1.544};
   double mrthn_ye[7]={.015, .014, .014, .016, .016, .016, .023};
-  for(int i=0;i<7;i++)mrthn_y[i]=mrthn_y[i]/2;
-  for(int i=0;i<7;i++)mrthn_ye[i]=mrthn_ye[i]/2;
+  double mrthn_corr[7]={1.00, .998, .998, 1.00, 1.003, 1.006};
+  for(int i=0;i<7;i++)mrthn_y[i]=mrthn_y[i]/2*mrthn_corr[i];
+  for(int i=0;i<7;i++)mrthn_ye[i]=mrthn_ye[i]/2*mrthn_corr[i];
   TGraphErrors *mrthn=new TGraphErrors(7,mrthn_x,mrthn_y,0,mrthn_ye);
   mrthn->SetMarkerStyle(21);
   mrthn->SetMarkerSize(1);
   mrthn->SetMarkerColor(kGreen+2);
  normalizeIt(mrthn,gm_cj);
  normalizeIt(gwhit,gm_cj);
- if(target=="r"&& angle=="21"){mrthn->Draw("sp");gwhit->Draw("sp");}
+ // if(target=="r"&& angle=="21"){mrthn->Draw("sp");gwhit->Draw("sp");}
+ if(target=="r"&& angle=="21"){mrthn->Draw("sp");}
 
   /////////////////////////////////////////////////////////////////////
 
@@ -242,16 +245,16 @@ if(target=="r"){
   if(spec=="hms")grcx5a=extractCS(spec,target,angle,pset[4],3,pass,xaxis);
 
 
-  TGraphErrors *grsys1=extractCS(spec,target,angle,pset[0],2,pass,xaxis);
+  TGraphAsymmErrors *grsys1=(TGraphAsymmErrors*)extractCS(spec,target,angle,pset[0],2,pass,xaxis);
   grsys1->SetName("grsys1");
-  TGraphErrors *grsys2=extractCS(spec,target,angle,pset[1],2,pass,xaxis);
+  TGraphAsymmErrors *grsys2=(TGraphAsymmErrors*)extractCS(spec,target,angle,pset[1],2,pass,xaxis);
   grsys2->SetName("grsys2"); 
-  TGraphErrors *grsys3=extractCS(spec,target,angle,pset[2],2,pass,xaxis);
+  TGraphAsymmErrors *grsys3=(TGraphAsymmErrors*)extractCS(spec,target,angle,pset[2],2,pass,xaxis);
   grsys3->SetName("grsys3");
-  TGraphErrors *grsys4=extractCS(spec,target,angle,pset[3],2,pass,xaxis);
+  TGraphAsymmErrors *grsys4=(TGraphAsymmErrors*)extractCS(spec,target,angle,pset[3],2,pass,xaxis);
   grsys4->SetName("grsys4");
-  TGraphErrors *grsys5;
-  if(spec=="hms")grsys5=extractCS(spec,target,angle,pset[4],2,pass,xaxis); 
+  TGraphAsymmErrors *grsys5;
+  if(spec=="hms")grsys5=(TGraphAsymmErrors*)extractCS(spec,target,angle,pset[4],2,pass,xaxis); 
 
   TGraphErrors *gr1=extractCS(spec,target,angle,pset[0],0,pass,xaxis);
   TGraphErrors *gr2=extractCS(spec,target,angle,pset[1],0,pass,xaxis);
@@ -261,12 +264,12 @@ if(target=="r"){
   if(spec=="hms")gr5=extractCS(spec,target,angle,pset[4],0,pass,xaxis);
 
   ///////////////////////////////////////////////////////
-  string kin=spec+"_"+target+angle+"deg";
-  xsecTable(grcx1, grsys1, gr1, thetac, kin+pset[0], target);
-  xsecTable(grcx2, grsys2, gr2, thetac, kin+pset[1], target);
-  xsecTable(grcx3, grsys3, gr3, thetac,  kin+pset[2], target);
-  xsecTable(grcx4, grsys4, gr4, thetac, kin+pset[3], target);
-  if(spec=="hms")xsecTable(grcx5, grsys5, gr5, thetac, kin+pset[4], target);
+  //  string kin=spec+"_"+target+angle+"deg";
+  //  xsecTable(grcx1, grsys1, gr1, thetac, kin+pset[0], target);
+  //  xsecTable(grcx2, grsys2, gr2, thetac, kin+pset[1], target);
+  //  xsecTable(grcx3, grsys3, gr3, thetac,  kin+pset[2], target);
+  //  xsecTable(grcx4, grsys4, gr4, thetac, kin+pset[3], target);
+  //  if(spec=="hms")xsecTable(grcx5, grsys5, gr5, thetac, kin+pset[4], target);
   ////////////////////////////////////////////////////////
   cout << "I got out of the table routine"<<endl;
   TGraphErrors *jmu=getJmu(target,angle,grd,grh,1);
@@ -488,7 +491,7 @@ if(target=="r"){
      leg->AddEntry(gm_k,"KP DIS","l");
      leg->AddEntry(gm_k1,"KP HYBRID","l");
      leg->AddEntry(gm_k2,"AKP17","l");
-     leg->AddEntry(gwhit,"Whitlow Data","p");
+     //     leg->AddEntry(gwhit,"Whitlow Data","p");
    }
  if(spec=="shms")leg->AddEntry(grcx1,"Data (E12-10-002)","p");
  if(spec=="hms"){

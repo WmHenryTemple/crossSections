@@ -19,15 +19,16 @@
 #include "src/getRadCorrW2.cpp"
 using namespace std;
 
-void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Double_t betaMax=1.5, 
-	       Double_t deltaMin=-6., Double_t deltaMax=9., Double_t minEdep=0.7, Double_t curCut=5., TString scaleDummy="h",TString fname="test.root"){
+void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_t betaMax=1.5, 
+	       Double_t deltaMin=-10., Double_t deltaMax=22., Double_t minEdep=0.7, Double_t curCut=5., TString scaleDummy="h",TString fname="pass1_run2868.root"){
   bool positron=false;
   bool use_saturation_correction=true;
   //  bool use_saturation_correction=false;
   //  bool use_delta_correction=false;
   bool use_delta_correction=true;
   Double_t target=readReport(run,"target");
-  bool use_w2_cut = (target==1.01) || (target>25. && scaleDummy=="h") ;                                                               
+  bool use_w2_cut = (target==1.01) || (target>25. && scaleDummy=="h") ;
+  use_w2_cut=false;                  
 
   // ELOG 336
   Double_t entr_fact=.23213;
@@ -42,29 +43,31 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
   if(run<2200)spec="hms";
 
   ofstream outFile;
-  outFile.open("dataYield_pass70.txt",ios::app | ios::out );
+  outFile.open("dataYield_pass500.txt",ios::app | ios::out );
   ofstream outErr;
-  outErr.open("p2perr_pass70.txt",ios::app | ios::out );
+  outErr.open("p2perr_pass500.txt",ios::app | ios::out );
 
-  Double_t beta, delta, etracknorm, ngc, curr, phd, thd, xfp, yfp, xpfp, ypfp, xCer, yCer, xb;
+  Double_t beta, delta, etracknorm, ngc, curr, phd, thd, xfp, yfp, xpfp, ypfp, xCer, yCer, xb, el_lo;
   Double_t  q2, w2,cerEff, calEff, mom, xd, yd, goode=0, goode_corr=0, boilCorr, errBoil, wt=0, sime=0,terr_pt2pt=0, terr_glob=0, piC=0;
   Double_t dipole=0;
   TString froot, report, fmc;
   TF1* fcer=getCerEffDelta(target);
   //  TH2F *hCerEff=getCerEff(0);
   //  TH2F *hCerErr=getCerEff(1);
+
   TF1 *pionC=getPionContamination(run);
+
 
   Double_t charge=readReport(run,"BCM4C charge");
   Double_t livetime=getLivetime(run,"tlt");
-
   Double_t trackEff=readReport(run,"tr eff");
   Double_t trigEff=readReport(run,"trig eff");
+  if (trigEff<.1)trigEff=1;
   Double_t psFact=readReport(run,"Ps2 fact");
   Double_t currentAvg=readReport(run,"BCM4C cut current");
 
   if(psFact<0)positron=true;
-  if(positron)livetime=1.-readReport(run,"ps2 clt et");
+  if(positron)livetime=readReport(run,"ps3 clt")/100.;
   if(positron)psFact=readReport(run,"Ps3 fact");
 
 
@@ -175,6 +178,7 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
   Double_t errTrig=.0003;  
   Double_t errPion=.001;
   if(abs(thetac-38.975)<.2)errPion=.002;
+  if(abs(thetac+58.98)<.2)errPion=.003;
   Double_t errLive=getLivetime(run,"tlte")/livetime;
 
 
@@ -184,7 +188,7 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
   Double_t minBin=-30.;
   Double_t maxBin=30.;
 
-  TFile *oFile=new TFile("dataYieldOut/pass70/"+fname,"RECREATE");
+  TFile *oFile=new TFile("dataYieldOut/pass500/"+fname,"RECREATE");
   //  TFile *oFile=new TFile(fname,"RECREATE");
   TTree *tree=new TTree("tree","Data");
   TTree *tree2=new TTree("tree2","Run Eff.");
@@ -193,7 +197,7 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
   tree2->Branch("boilCorr",&boilCorr);
   tree2->Branch("livetime",&livetime);
   tree2->Branch("trackEff",&trackEff);
-  tree2->Branch("trigEff",&trackEff);
+  tree2->Branch("trigEff",&trigEff);
   tree2->Branch("psFact",&psFact);
   tree2->Branch("scale",&scale);
   tree2->Fill();
@@ -227,6 +231,7 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
 ;
   if(spec=="shms"){
     froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3e-shms-data/shms_replay_production_%d_-1.root",run);
+    //    froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-1-shms-data-v2/shms_replay_production_%d_-1.root",run);
     //    froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3d-shms-data/shms_replay_production_%d_-1.root",run);
     //    froot = Form("/w/hallc-scifs17exp/xem2/abishek/f2-emc/ROOTfiles/realpass-3d-shms-new/shms_replay_production_%d_-1.root",run);
     //    froot = Form("/lustre19/expphy/volatile/hallc/xem2/abishek/ROOTfiles/realpass-3d-shms-corrMatrix/shms_replay_production_%d_-1.root",run);
@@ -245,9 +250,9 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
   //  }
   if(spec=="hms"){  
     //    froot = Form("/lustre19/expphy/volatile/hallc/xem2/abishek/ROOTfiles/realpass-3d-hms/hms_replay_production_%d_-1.root",run);
-    froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3d-hms-data/hms_replay_production_%d_-1.root",run);
+    if(run==1608)froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3b-hms-data/hms_replay_production_%d_-1.root",run);
+    else froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3d-hms-data/hms_replay_production_%d_-1.root",run);
 // if(run>=1565 && run <= 1589)froot = Form("/volatile/hallc/xem2/abishek/ROOTfiles/no_offset/hms_replay_production_%d_-1.root",run);
-
   }
   //  froot= Form("/volatile/hallc/spring17/wmhenry/f2/ROOTfiles/hms_replay_production_%d_-1.root",run);
   //  froot=Form("/volatile/hallc/spring17/wmhenry/f2/boiling/tof100/hms_replay_production_%d_-1.root",run);
@@ -285,9 +290,12 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
       TH1D *hypd=new TH1D("hypd","Data yptar",100,-100,100);
       TH1D *hxd=new TH1D("hxd","Data x tar",100,-1.,1.);
       TH1D *hyd=new TH1D("hyd","Data y tar",334,-10,10);
-      TH1D *hw2d=new TH1D("hw2d","Data W2",375,-10,20);
+      //      TH1D *hw2d=new TH1D("hw2d","Data W2",375,-10,20);
+
       TH1D *hw2d_calc=new TH1D("hw2d_calc","Data W2 Calc",375,-10,20);//375
-      TH1D *hw2d_calc2=new TH1D("hw2d_calc2","Data W2 Calc",720,-10,26);//375
+
+      TH1D *hw2d=new TH1D("hw2d","Data W2",1440,-10,26);      
+      TH1D *hw2d_calc2=new TH1D("hw2d_calc2","Data W2 Calc",1440,-10,26);//375
       TH1D *hq2d=new TH1D("hq2d","Data Q2",500,-10,50);
       TH1D *hq2d_calc=new TH1D("hq2d_calc","Data Q2 Calc",500,-10,50);
       TH1D *hcerr=new TH1D("hcerr","Cer Eff",100,.9,1.0);      
@@ -295,7 +303,19 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
       TH1D *hcal=new TH1D("hcal","Cal Eff",100,.995,1.);      
       TH1D *hxb=new TH1D("hxb","xb Good Events",120,0,3);     
 
-      TH1D *hmom=new TH1D("hmom","hmom",70,1,3.2);     
+      TH1D *hmom=new TH1D("hmom","hmom",80,0.5,3.2);     
+
+      // Pion Contaimination
+      TH1D *hmom1=new TH1D("hmom1","hmom1",500,0,7);     
+      TH1D *hmom2=new TH1D("hmom2","hmom2",500,0,7);     
+      TH1D *hmom3=new TH1D("hmom3","hmom3",500,0,7);     
+      TH1D *hcal_e1=new TH1D("hcal_e1","hcal_e1",300,0,2);     
+      TH1D *hcal_e2=new TH1D("hcal_e2","hcal_e2",300,0,2);     
+      TH1D *hcal_e3=new TH1D("hcal_e3","hcal_e3",300,0,2);     
+      TH1D *hcal_pi1=new TH1D("hcal_pi1","hcal_pi1",300,0,2);     
+      TH1D *hcal_pi2=new TH1D("hcal_pi2","hcal_pi2",300,0,2);     
+      TH1D *hcal_pi3=new TH1D("hcal_pi3","hcal_pi3",300,0,2);     
+      /////////////////////////
 
       TH2D *hdumFact=new TH2D("hdumFact","Dummy Scale factor vs ytar",50,-10,10,50,.1,.3);
       // Focal Plane Plots
@@ -329,7 +349,10 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
       tr->SetBranchAddress(Form("%s.cal.etracknorm",arm.c_str()), &etracknorm);
       tr->SetBranchAddress(Form("%s.bcm.bcm4c.AvgCurrent",arm.c_str()), &curr);
       if(spec=="shms")tr->SetBranchAddress("P.ngcer.npeSum", &ngc);
-      if(spec=="hms")tr->SetBranchAddress("H.cer.npeSum", &ngc);
+      if(spec=="hms"){
+	tr->SetBranchAddress("H.cer.npeSum", &ngc);
+	tr->SetBranchAddress("T.hms.hEL_LO_tdcTime", &el_lo);
+      }
       cout << "Done setting Branch Addresses"<<endl;
       Int_t nEvents = tr->GetEntries();
       cout << "There are "<<nEvents<<" events"<<endl;
@@ -375,7 +398,6 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
 	  ////	  errCer=hCerErr->GetBinContent(hCerEff->FindBin(yCer,xCer));
 	  ////	  errCer=errCer/cerEff;
 	  //if(cerEff==0){cerEff=1;}//errCer=0;}
-
 	  if(spec=="hms")cerEff=0.98;
 	  bool fid=fidCut(xfp, yfp, xpfp, ypfp);//shms only
 	  bool coll=collCut(thd, phd, delta, yd);//shms only
@@ -383,15 +405,39 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
 	  //   only apply w2 cut for hydrogen analysis
 	  bool w2_cut=true;
 	  if(use_w2_cut)w2_cut = w2_calc > 1.2;
+
+
+	  //Pion Contamination
+	  if(abs(thd)<xpCut && abs(phd)<ypCut && abs(yd) < yCut && w2_cut && dipole==1){
+	    if(delta > -6 && delta <= -2){
+	      hmom1->Fill(mom);
+	      if(ngc>1.5)hcal_e1->Fill(etracknorm);
+	      if(ngc<1.5&&el_lo>0) hcal_pi1->Fill(etracknorm);
+	    }
+	    if(delta > -2 && delta <= 3){
+	      hmom2->Fill(mom);
+	      if(ngc>1.5)hcal_e2->Fill(etracknorm);
+	      if(ngc<1.5&&el_lo>0) hcal_pi2->Fill(etracknorm);
+	    }
+	    if(delta > 3 && delta <= 10){
+	      hmom3->Fill(mom);
+	      if(ngc>1.5)hcal_e3->Fill(etracknorm);
+	      if(ngc<1.5&&el_lo>0) hcal_pi3->Fill(etracknorm);
+	    }
+	  }
+
 	  if(ngc > ngcCut && delta > deltaMin && delta < deltaMax && etracknorm > minEdep){
-	    //	    if(abs(thd)<xpCut && abs(phd)<ypCut && abs(yd) < yCut && w2_cut && yd>0)
+	    //	    if(abs(thd)<xpCut && abs(phd)<ypCut && abs(yd) < yCut && w2_cut && dipole==1&&yd>0) //Foil studies
 	    if(abs(thd)<xpCut && abs(phd)<ypCut && abs(yd) < yCut && w2_cut && dipole==1)
 	      {
 		if(curr>curCut){// && fid && coll){
 		  //Get event by event corrections
 		  if(spec=="shms")piC=pionC->Eval(hse);
-		  else piC=0.0;
-		  if(piC>1000.){
+		  if(spec=="hms"){
+		    if(thetac > -40.)piC=pionC->Eval(hse);
+		    else piC=0.0;
+		  }
+		  if(iEvent%10000==0){
 		    cout <<"Event # "<<iEvent<<"\t"; 
 		    cout << "Pion Cont "<<piC<<"\t";
 		    cout << "P.gtr.p "<<mom<<"\t";
@@ -400,6 +446,7 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
 		    cout << "thd "<<thd<<"\t";
 		    cout <<endl;
 		  }
+
 		  hpion->Fill(piC);
 		  hcerr->Fill(cerEff);
 		  if(spec=="shms")calEff=getCalEff(hse);
@@ -439,11 +486,17 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
 		    cout << scale <<"\t";
 		    cout << dumscale <<endl;
 		  }
-		  //  Double_t scale = (Double_t)1/(livetime)/trackEff/trigEff/(boilCorr)*psFact;
+
 		  //		  yield4acc->Fill(1000*phd, delta);
 		  if(spec=="shms")yield4acc->Fill(1000*(hstheta-thetacrad), delta, wt);
 		  if(spec=="hms")yield4acc->Fill(1000*(hstheta+thetacrad), delta, wt);
-		  hmom->Fill(mom,psFact);
+
+		  //  Double_t scale = (Double_t)1/(livetime)/trackEff/trigEff/(boilCorr)*psFact;
+
+		  // Weight=(1.0 - f->Eval(mom)) * psfact /efficin
+
+		  //		  hmom->Fill(mom,wt);
+		  hmom->Fill(mom,scale*(1.0-piC));
 		  hdd->Fill(delta,wt);
 		  hdd2->Fill(delta,wt);
 		  hdd3->Fill(delta,wt);
@@ -474,10 +527,12 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
 		  xVxp->Fill(xpfp,xfp,wt);
 		  ypVy->Fill(yfp,ypfp,wt);
 		  yptarVytar->Fill(yd,phd,wt);
+
 		  //wt=(1.0-piC)/cerEff/(boilCorr)*scale;
 		  // errors should be fractional (%)
-		  if(spec=="hms")errPion=pionC->Eval(hse);
+		  if(spec=="hms"&&thetac>-40)errPion=pionC->Eval(hse);
 		  terr_glob=0;
+
 		  terr_glob+=pow(errCer,2.);
 		  //		    terr+=pow(errCal,2);
 		  terr_glob+=pow(avgerrBoil,2.);
@@ -683,6 +738,9 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
       yield4acc->Write();
       hdd->Write();
       hmom->Write();
+      hmom1->Write();
+      hmom2->Write();
+      hmom3->Write();
       hdd2->Write();
       hdd3->Write();
       hdd4->Write();
@@ -727,6 +785,13 @@ void dataYield(Int_t run=1984, Double_t ngcCut=1.5, Double_t betaMin =0.5, Doubl
       xVxp->Write();
       ypVy->Write();
       yptarVytar->Write();
+      hcal_e1->Write();
+      hcal_e2->Write();
+      hcal_e3->Write();
+      hcal_pi1->Write();
+      hcal_pi2->Write();
+      hcal_pi3->Write();
+
       oFile->Close();
       delete oFile;
       
