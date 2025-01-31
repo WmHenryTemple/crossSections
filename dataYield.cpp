@@ -29,6 +29,10 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
   bool use_w2_cut = (target==1.01) || (target>25. && scaleDummy=="h") ;
   use_w2_cut=false;                  
 
+  //determine spec, from run number
+  string spec="shms";
+  if(run<2200)spec="hms";
+
   //cuts
   string arm;
   double xpCut, ypCut, yCut;
@@ -52,10 +56,6 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       entr_fact=.20118;
       exit_fact=.29107;
     }
-
-  //determine spec, from run number
-  string spec="shms";
-  if(run<2200)spec="hms";
 
   //variables
   Double_t beta, delta, etracknorm, ngc, curr, phd, thd, xfp, yfp, xpfp, ypfp, xCer, yCer, xb, el_lo;
@@ -179,9 +179,78 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
   tree->Branch("w2_calc", &w2_calc);
   tree->Branch("wt",&wt);
 
+  // Define Histograms
+  Int_t nbins=60;
+  Double_t minBin=-30.;
+  Double_t maxBin=30.;
+  TH1D *hyld=new TH1D("hyld","Data Raw",nbins,minBin,maxBin);
+  TH1D *hdd=new TH1D("hdd","Data Weighted",nbins,minBin,maxBin);
+  TH1D *hdd2=new TH1D("hdd2","No Pion Cont.",nbins,minBin,maxBin);
+  TH1D *hdd3=new TH1D("hdd3","No Livetime",nbins,minBin,maxBin);
+  TH1D *hdd4=new TH1D("hdd4","No Tracking Eff",nbins,minBin,maxBin);
+  TH1D *hdd5=new TH1D("hdd5","No Trigger Eff",nbins,minBin,maxBin);
+  TH1D *hdd6=new TH1D("hdd6","No Cerenkov Eff",nbins,minBin,maxBin);
+  TH1D *hdd7=new TH1D("hdd7","No Calo. Eff",nbins,minBin,maxBin);
+  TH1D *hdd8=new TH1D("hdd8","No SHMS Acc",nbins,minBin,maxBin);  
+  TH1D *hAvgTheta=new TH1D("hAvgTheta","Average Theta per Bin",nbins,minBin,maxBin);
+  TH1D *hAvgDelta=new TH1D("hAvgDelta","Average Delta per Bin",nbins,minBin,maxBin);
+  TH1D *hBoilCorr=new TH1D("hBoilCorr","Average Boiling Correction",nbins,minBin,maxBin);
+  TH1D *heff=new TH1D("heff","Efficiency",nbins,minBin,maxBin);
+  TH1D *heffcal=new TH1D("heffcal","Calo. Efficiency",nbins,minBin,maxBin);
+  TH1D *heffcer=new TH1D("heffcer","Cer. Efficiency",nbins,minBin,maxBin);
+  TH1D *herrcer=new TH1D("herrcer","Cer. Error",nbins,minBin,maxBin);
+  TH1D *heffpion=new TH1D("heffpion","Pion Contamination",nbins,minBin,maxBin);
+  TH1D *herr_pt2pt=new TH1D("herr_pt2pt","Point to point error",nbins,minBin,maxBin);
+  TH1D *herr_boil=new TH1D("herr_boil","p2p boiling error",nbins,minBin,maxBin);
+  TH1D *herr_live=new TH1D("herr_live","p2p livetime error",nbins,minBin,maxBin);
+  TH1D *herr_track=new TH1D("herr_track","p2p track eff error",nbins,minBin,maxBin);
+  TH1D *herr_trig=new TH1D("herr_trig","p2p trig. eff error",nbins,minBin,maxBin);
+  TH1D *herrCSB=new TH1D("herrCSB","CSB error",nbins,minBin,maxBin);
+  TH1D *herrKin=new TH1D("herrKin","Kinematic (th,e',Eb) error",nbins,minBin,maxBin);
+  TH1D *herrKinRatio=new TH1D("herrKinRatio","Kinematic (th,e',Eb) error on D/H",nbins,minBin,maxBin);
+  TH1D *herr_global=new TH1D("herr_global","Total Band error",nbins,minBin,maxBin);
+  TH1D *herr_globalR=new TH1D("herr_globalR","Total Band error D/H",nbins,minBin,maxBin);
+  TH1D *herrTot=new TH1D("herrTot","Total sys error",nbins,minBin,maxBin);
+  TH1D *hxpd=new TH1D("hxpd","Data xptar",100,-100,100);
+  TH1D *hypd=new TH1D("hypd","Data yptar",100,-100,100);
+  TH1D *hxd=new TH1D("hxd","Data x tar",100,-1.,1.);
+  TH1D *hyd=new TH1D("hyd","Data y tar",334,-10,10);
+  TH1D *hw2d_calc=new TH1D("hw2d_calc","Data W2 Calc",375,-10,20);//375
+  TH1D *hw2d=new TH1D("hw2d","Data W2",1440,-10,26);      
+  TH1D *hw2d_calc2=new TH1D("hw2d_calc2","Data W2 Calc",1440,-10,26);//375
+  TH1D *hq2d=new TH1D("hq2d","Data Q2",500,-10,50);
+  TH1D *hq2d_calc=new TH1D("hq2d_calc","Data Q2 Calc",500,-10,50);
+  TH1D *hcerr=new TH1D("hcerr","Cer Eff",100,.9,1.0);      
+  TH1D *hpion=new TH1D("hpion","Pion Contamination",200,0,.2);      
+  TH1D *hcal=new TH1D("hcal","Cal Eff",100,.995,1.);      
+  TH1D *hxb=new TH1D("hxb","xb Good Events",120,0,3);     
+  TH1D *hmom=new TH1D("hmom","hmom",80,0.5,3.2);     
+  // Pion Contaimination
+  TH1D *hmom1=new TH1D("hmom1","hmom1",500,0,7);     
+  TH1D *hmom2=new TH1D("hmom2","hmom2",500,0,7);     
+  TH1D *hmom3=new TH1D("hmom3","hmom3",500,0,7);     
+  TH1D *hcal_e1=new TH1D("hcal_e1","hcal_e1",300,0,2);     
+  TH1D *hcal_e2=new TH1D("hcal_e2","hcal_e2",300,0,2);     
+  TH1D *hcal_e3=new TH1D("hcal_e3","hcal_e3",300,0,2);     
+  TH1D *hcal_pi1=new TH1D("hcal_pi1","hcal_pi1",300,0,2);     
+  TH1D *hcal_pi2=new TH1D("hcal_pi2","hcal_pi2",300,0,2);     
+  TH1D *hcal_pi3=new TH1D("hcal_pi3","hcal_pi3",300,0,2);     
+  // Dummy
+  TH2D *hdumFact=new TH2D("hdumFact","Dummy Scale factor vs ytar",50,-10,10,50,.1,.3);
+  // Focal Plane Plots
+  TH2F *xVy=new TH2F("xVy","x_fp vs y_fp; y_fp (cm); x_fp (cm)",100,-40.,40.0,100,-40.,40.);
+  TH2F *xpVyp=new TH2F("xpVyp","xp_fp vs yp_fp; yp_fp (rad); xp_fp (rad)",100,-0.06,0.06,100,-0.1,0.1);
+  TH2F *xVxp=new TH2F("xVxp","x_fp vs x_fp; xp_fp (rad); x_fp (cm)",100,-0.1,0.1,100,-40.,40.);
+  TH2F *ypVy=new TH2F("ypVy","yp_fp vs y_fp; y_fp (cm); yp_fp (rad)",100,-40.,40.0,100,-0.06,0.06);
+  TH2F *yptarVytar=new TH2F("yptarVytar","yp_tar vs y_tar; y_tar (cm); yp_tar (rad)",100,-6,6,100,-0.05,0.05);
+  TH2F *yield4acc=new TH2F("yield4acc","yield; theta; delta",30,-65,65,60,-30,30);
+  heff->Sumw2();
+  hdd->Sumw2();
+
   //get data rootfile
   if(spec=="shms"){
     froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3e-shms-data/shms_replay_production_%d_-1.root",run);
+  }
   if(spec=="hms"){  
     if(run==1608)froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3b-hms-data/hms_replay_production_%d_-1.root",run);
     else froot = Form("/lustre/expphy/cache/hallc/E12-10-002/abishek/realpass-3d-hms-data/hms_replay_production_%d_-1.root",run);
@@ -216,72 +285,7 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       }
       cout << "Done setting Branch Addresses"<<endl;
 
-      // Define Histograms
-      Int_t nbins=60;
-      Double_t minBin=-30.;
-      Double_t maxBin=30.;
-      TH1D *hyld=new TH1D("hyld","Data Raw",nbins,minBin,maxBin);
-      TH1D *hdd=new TH1D("hdd","Data Weighted",nbins,minBin,maxBin);
-      TH1D *hdd2=new TH1D("hdd2","Statistical + pt2pt",nbins,minBin,maxBin);
-      TH1D *hdd3=new TH1D("hdd3","nothing ",nbins,minBin,maxBin);
-      TH1D *hdd4=new TH1D("hdd4","Data lt, ps, trk, boil",nbins,minBin,maxBin);
-      TH1D *hdd5=new TH1D("hdd5","Data lt, ps, trk, boil, trg",nbins,minBin,maxBin);
-      TH1D *hdd6=new TH1D("hdd6","Data lt, ps, trk, boil, trg, cal",nbins,minBin,maxBin);
-      TH1D *hdd7=new TH1D("hdd7","Data lt, ps, trk, boil, trg, cal, cer",nbins,minBin,maxBin);
-      TH1D *hAvgTheta=new TH1D("hAvgTheta","Average Theta per Bin",nbins,minBin,maxBin);
-      TH1D *hAvgDelta=new TH1D("hAvgDelta","Average Delta per Bin",nbins,minBin,maxBin);
-      TH1D *hBoilCorr=new TH1D("hBoilCorr","Average Boiling Correction",nbins,minBin,maxBin);
-      TH1D *heff=new TH1D("heff","Efficiency",nbins,minBin,maxBin);
-      TH1D *heffcal=new TH1D("heffcal","Calo. Efficiency",nbins,minBin,maxBin);
-      TH1D *heffcer=new TH1D("heffcer","Cer. Efficiency",nbins,minBin,maxBin);
-      TH1D *herrcer=new TH1D("herrcer","Cer. Error",nbins,minBin,maxBin);
-      TH1D *heffpion=new TH1D("heffpion","Pion Contamination",nbins,minBin,maxBin);
-      TH1D *herr_pt2pt=new TH1D("herr_pt2pt","Point to point error",nbins,minBin,maxBin);
-      TH1D *herr_boil=new TH1D("herr_boil","p2p boiling error",nbins,minBin,maxBin);
-      TH1D *herr_live=new TH1D("herr_live","p2p livetime error",nbins,minBin,maxBin);
-      TH1D *herr_track=new TH1D("herr_track","p2p track eff error",nbins,minBin,maxBin);
-      TH1D *herr_trig=new TH1D("herr_trig","p2p trig. eff error",nbins,minBin,maxBin);
-      TH1D *herrCSB=new TH1D("herrCSB","CSB error",nbins,minBin,maxBin);
-      TH1D *herrKin=new TH1D("herrKin","Kinematic (th,e',Eb) error",nbins,minBin,maxBin);
-      TH1D *herrKinRatio=new TH1D("herrKinRatio","Kinematic (th,e',Eb) error on D/H",nbins,minBin,maxBin);
-      TH1D *herr_global=new TH1D("herr_global","Total Band error",nbins,minBin,maxBin);
-      TH1D *herr_globalR=new TH1D("herr_globalR","Total Band error D/H",nbins,minBin,maxBin);
-      TH1D *herrTot=new TH1D("herrTot","Total sys error",nbins,minBin,maxBin);
-      TH1D *hxpd=new TH1D("hxpd","Data xptar",100,-100,100);
-      TH1D *hypd=new TH1D("hypd","Data yptar",100,-100,100);
-      TH1D *hxd=new TH1D("hxd","Data x tar",100,-1.,1.);
-      TH1D *hyd=new TH1D("hyd","Data y tar",334,-10,10);
-      TH1D *hw2d_calc=new TH1D("hw2d_calc","Data W2 Calc",375,-10,20);//375
-      TH1D *hw2d=new TH1D("hw2d","Data W2",1440,-10,26);      
-      TH1D *hw2d_calc2=new TH1D("hw2d_calc2","Data W2 Calc",1440,-10,26);//375
-      TH1D *hq2d=new TH1D("hq2d","Data Q2",500,-10,50);
-      TH1D *hq2d_calc=new TH1D("hq2d_calc","Data Q2 Calc",500,-10,50);
-      TH1D *hcerr=new TH1D("hcerr","Cer Eff",100,.9,1.0);      
-      TH1D *hpion=new TH1D("hpion","Pion Contamination",200,0,.2);      
-      TH1D *hcal=new TH1D("hcal","Cal Eff",100,.995,1.);      
-      TH1D *hxb=new TH1D("hxb","xb Good Events",120,0,3);     
-      TH1D *hmom=new TH1D("hmom","hmom",80,0.5,3.2);     
-      // Pion Contaimination
-      TH1D *hmom1=new TH1D("hmom1","hmom1",500,0,7);     
-      TH1D *hmom2=new TH1D("hmom2","hmom2",500,0,7);     
-      TH1D *hmom3=new TH1D("hmom3","hmom3",500,0,7);     
-      TH1D *hcal_e1=new TH1D("hcal_e1","hcal_e1",300,0,2);     
-      TH1D *hcal_e2=new TH1D("hcal_e2","hcal_e2",300,0,2);     
-      TH1D *hcal_e3=new TH1D("hcal_e3","hcal_e3",300,0,2);     
-      TH1D *hcal_pi1=new TH1D("hcal_pi1","hcal_pi1",300,0,2);     
-      TH1D *hcal_pi2=new TH1D("hcal_pi2","hcal_pi2",300,0,2);     
-      TH1D *hcal_pi3=new TH1D("hcal_pi3","hcal_pi3",300,0,2);     
-      // Dummy
-      TH2D *hdumFact=new TH2D("hdumFact","Dummy Scale factor vs ytar",50,-10,10,50,.1,.3);
-      // Focal Plane Plots
-      TH2F *xVy=new TH2F("xVy","x_fp vs y_fp; y_fp (cm); x_fp (cm)",100,-40.,40.0,100,-40.,40.);
-      TH2F *xpVyp=new TH2F("xpVyp","xp_fp vs yp_fp; yp_fp (rad); xp_fp (rad)",100,-0.06,0.06,100,-0.1,0.1);
-      TH2F *xVxp=new TH2F("xVxp","x_fp vs x_fp; xp_fp (rad); x_fp (cm)",100,-0.1,0.1,100,-40.,40.);
-      TH2F *ypVy=new TH2F("ypVy","yp_fp vs y_fp; y_fp (cm); yp_fp (rad)",100,-40.,40.0,100,-0.06,0.06);
-      TH2F *yptarVytar=new TH2F("yptarVytar","yp_tar vs y_tar; y_tar (cm); yp_tar (rad)",100,-6,6,100,-0.05,0.05);
-      TH2F *yield4acc=new TH2F("yield4acc","yield; theta; delta",30,-65,65,60,-30,30);
-      heff->Sumw2();
-      hdd->Sumw2();
+
       //HMS delta correction
       double p1 = 0.0001307595;
       double p2 =-0.0005277879;
@@ -417,13 +421,16 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
 		  if(spec=="hms")yield4acc->Fill(1000*(hstheta+thetacrad), delta, wt);
 		  hmom->Fill(mom,scale*(1.0-piC));
 		  // delta histograms
+		  //   wt=(1.0-piC)/calEff/cerEff/shms_acc_corr*scale*dumscale;		  
+		  //  scale = (Double_t)1/(livetime)/trackEff/trigEff*psFact;
 		  hdd->Fill(delta,wt);
-		  hdd2->Fill(delta,wt);
-		  hdd3->Fill(delta,wt);
-		  hdd4->Fill(delta,wt*trigEff/(1.0-piC));
-		  hdd5->Fill(delta,wt/calEff);
-		  hdd6->Fill(delta,wt/calEff/(1.0-piC));
-		  hdd7->Fill(delta,wt*trigEff/calEff/(1.0-piC));
+		  hdd2->Fill(delta,wt/(1-piC));
+		  hdd3->Fill(delta,wt*livetime);
+		  hdd4->Fill(delta,wt*trackEff);
+		  hdd5->Fill(delta,wt*trigEff);
+		  hdd6->Fill(delta,wt*cerEff);
+		  hdd7->Fill(delta,wt*calEff);		  
+		  hdd8->Fill(delta,wt*shms_acc_corr);
 		  hyld->Fill(delta);
 		  heff->Fill(delta,wt);
 		  heffcal->Fill(delta,calEff);
@@ -488,6 +495,7 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
 	      }
 	  }
 	}
+
       //*************************************************************************************
       //********************************** Summary Output   *********************************
       //*************************************************************************************		  
@@ -568,14 +576,21 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       outFile << "***************************************************************************************"<<endl;
       outFile << "***************************************************************************************"<<endl;
       outFile.close();
-
+      cout << "Closing F"<<endl;
       f->Close();
+      cout << "Delteing F"<<endl;      
       delete f;
+      cout << "ofile-cd()"<<endl;      
       oFile->cd();
+      cout << "Writing tree"<<endl;      
       tree->Write();
+      
       tree2->Write();
+      cout << "Writing histos"<<endl;      
       hdumFact->Write();
+      cout << "Writing histos"<<endl;            
       yield4acc->Write();
+      cout << "Writing histos"<<endl;            
       hdd->Write();
       hmom->Write();
       hmom1->Write();
@@ -587,7 +602,9 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       hdd5->Write();
       hdd6->Write();
       hdd7->Write();
+      hdd8->Write();      
       hAvgTheta->Write();
+      cout << "Writing histos"<<endl;            
       hAvgDelta->Write();
       hBoilCorr->Write();
       hyld->Write();
@@ -597,6 +614,7 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       herrcer->Write();
       heffpion->Write();
       herr_pt2pt->Write();
+      cout << "Writing histos"<<endl;      
       herr_boil->Write();
       herr_live->Write();
       herr_track->Write();
@@ -608,6 +626,9 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       herr_global->Write();
       herr_globalR->Write();
       hxpd->Write();
+      cout << "Writing histos"<<endl;      
+
+
       hypd->Write();
       hxd->Write();
       hyd->Write();
@@ -624,6 +645,7 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       xpVyp->Write();
       xVxp->Write();
       ypVy->Write();
+      cout << "Writing histos"<<endl;            
       yptarVytar->Write();
       hcal_e1->Write();
       hcal_e2->Write();
@@ -631,10 +653,14 @@ void dataYield(Int_t run=2868, Double_t ngcCut=2, Double_t betaMin =0.5, Double_
       hcal_pi1->Write();
       hcal_pi2->Write();
       hcal_pi3->Write();
+      cout << "Closing ofile"<<endl;      
       oFile->Close();
       delete oFile;
-      
+
+
     }
+
+
   
   else {cout << "Couldn't find "<<froot<<endl;}
   
